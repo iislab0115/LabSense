@@ -1,0 +1,24 @@
+{
+    "_comment_1": "Copy this file to config.local.json and fill in your own values. config.local.json is git-ignored and will override this template at runtime.",
+    "_comment_2": "SmartThings OAuth credentials: create an app in the SmartThings Developer Workspace to obtain these.",
+
+    "CLIENT_ID": "Please enter your SmartThings CLIENT_ID here",
+    "CLIENT_SECRET": "Please enter your SmartThings CLIENT_SECRET here",
+    "REDIRECT_URI": "https://httpbin.org/get",
+    "TOKEN_URL": "https://api.smartthings.com/oauth/token",
+    "API_BASE_URL": "https://api.smartthings.com/v1",
+    "PAT_TOKEN": "Please enter your SmartThings Personal Access Token here",
+
+    "LOG_FILE": "Please enter the absolute path for the log file, e.g. D:/smartthings_data/logs/smartthings.log",
+    "TOKEN_FILE": "Please enter the absolute path for the OAuth token file, e.g. D:/smartthings_data/tokens/oauth_token.json",
+    "CSV_BASE_DIR": "Please enter the base directory for CSV output, e.g. D:/smartthings_data/csv_data",
+    "METADATA_FILE": "Please enter the absolute path for device metadata, e.g. D:/smartthings_data/metadata/device_metadata.json",
+    "BAN_LIST_FILE": "Please enter the absolute path for the ban list, e.g. D:/smartthings_data/ban_list.json",
+    "CLIP_DIR": "Please enter the base directory for camera clips, e.g. D:/smartthings_data/clips",
+
+    "DEVICE_UPDATE_INTERVAL": 600,
+    "DEVICE_STATUS_INTERVAL": 60,
+    "MAX_RETRIES": 5,
+    "BASE_RETRY_WAIT": 5,
+    "MAX_RETRY_WAIT": 60
+}

@@ -1,0 +1,62 @@
+# ===== 민감 정보 =====
+# config.json 은 placeholder 템플릿이라 커밋되고, 실제 값은 config.local.json 에 저장
+config.local.json
+*.token
+*.secret
+oauth_token.json
+tokens/
+
+# ===== 수집 데이터 / 로그 =====
+csv_data/
+logs/
+clips/
+metadata/
+ban_list.json
+*.log
+*.csv
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 가상환경
+.venv/
+venv/
+env/
+ENV/
+
+# ===== IDE / OS =====
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+*.ipynb
+
+# ===== 기타 =====
+*.bak
+*.tmp
