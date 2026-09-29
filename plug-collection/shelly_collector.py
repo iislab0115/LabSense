@@ -26,19 +26,20 @@ import threading
 
 
 def _load_config():
-    """config.local.json 이 있으면 그것을, 없으면 config.json 템플릿을 읽는다.
+    """Load config.local.json if present, otherwise the config.json template.
 
-    기기 주소는 설치 환경마다 다르므로 소스에 두지 않는다. smartthings_auth.py
-    와 같은 규칙을 쓴다: config.json 은 커밋되는 템플릿이고, 실제 값은
-    git-ignore 되는 config.local.json 에 넣는다.
+    Device addresses differ per deployment, so they are not kept in the source.
+    This follows the same rule as smartthings_auth.py: config.json is the
+    committed template and the real values live in config.local.json, which is
+    git-ignored.
     """
     base = Path(__file__).resolve().parent
     local = base / "config.local.json"
     path = local if local.exists() else base / "config.json"
     if not path.exists():
         raise SystemExit(
-            "config.json / config.local.json 을 찾을 수 없습니다.\n"
-            "config.json 을 config.local.json 으로 복사한 뒤 값을 채워 주세요."
+            "config.json / config.local.json not found.\n"
+            "Copy config.json to config.local.json and fill in your own values."
         )
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f), path
@@ -53,19 +54,19 @@ def _devices_from_config(cfg, path):
            if "Please enter" in str(d.get("ip", "")) or "Please enter" in str(d.get("id", ""))]
     if not devices or bad:
         raise SystemExit(
-            "SHELLY_DEVICES 가 설정되지 않았습니다 (%s).\n"
-            "config.json 을 config.local.json 으로 복사하고, 각 플러그의 label, id, ip 를\n"
-            "실제 값으로 채워 주세요." % path.name
+            "SHELLY_DEVICES is not configured (%s).\n"
+            "Copy config.json to config.local.json and fill in the label, id and ip\n"
+            "of each plug with your own values." % path.name
         )
     return devices
 
 
-# 스마트플러그 정보 (config.local.json 에서 로드)
+# Smart plug inventory, loaded from config.local.json
 DEVICES = _devices_from_config(CONFIG, CONFIG_PATH)
 
-# 수집 설정
-INTERVAL = float(CONFIG.get("SHELLY_INTERVAL", 1.0))  # 기본 1초 간격
-TIMEOUT = float(CONFIG.get("SHELLY_TIMEOUT", 4.0))    # HTTP 요청 타임아웃 (Wi-Fi 지연 대비)
+# Collection settings
+INTERVAL = float(CONFIG.get("SHELLY_INTERVAL", 1.0))  # polling interval, default 1 s
+TIMEOUT = float(CONFIG.get("SHELLY_TIMEOUT", 4.0))    # HTTP timeout, allows for Wi-Fi latency
 MAX_RETRIES = 3  # 재시도 횟수
 
 # GUI(또는 프로그램 출력)용 주기
@@ -76,8 +77,8 @@ FLUSH_EVERY_SAMPLES = 10
 _csv_base = CONFIG.get("CSV_BASE_DIR", "")
 if not _csv_base or "Please enter" in str(_csv_base):
     raise SystemExit(
-        "CSV_BASE_DIR 이 설정되지 않았습니다 (%s).\n"
-        "CSV 출력 디렉터리의 절대 경로를 넣어 주세요." % CONFIG_PATH.name
+        "CSV_BASE_DIR is not configured (%s).\n"
+        "Set it to the absolute path of the directory for CSV output." % CONFIG_PATH.name
     )
 CSV_BASE_DIR = Path(_csv_base)
 CSV_BASE_DIR.mkdir(parents=True, exist_ok=True)
