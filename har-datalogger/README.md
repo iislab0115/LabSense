@@ -56,7 +56,7 @@ Open your mobile or PC browser and enter the server address.
 ## 📦 Download & Execution (For Lab Members)
 If you want to run the logger without setting up a Python environment, follow these steps:
 
-1. **Download**: Go to the [Releases](https://github.com/jyoung531/HAR-DataLogger/releases) page.
+1. **Download**: Go to the [Releases](https://github.com/iislab0115/LabSense/releases) page.
 2. **Get the File**: Download the latest version of `NRF_DataLogger.exe`.
 3. **Run**: Double-click the `.exe` file.
     * *Note: Your PC must be connected to the lab's Tailscale network to host or access the server.*

@@ -3,8 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](#system-requirements)
-[![Release](https://img.shields.io/github/v/release/lime9903/data-collection?include_prereleases&label=Release)](https://github.com/lime9903/data-collection/releases)
-[![Last Commit](https://img.shields.io/github/last-commit/lime9903/data-collection)](https://github.com/lime9903/data-collection/commits/main)
+[![Release](https://img.shields.io/github/v/release/iislab0115/LabSense?include_prereleases&label=Release)](https://github.com/iislab0115/LabSense/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/iislab0115/LabSense)](https://github.com/iislab0115/LabSense/commits/main)
 [![Cite](https://img.shields.io/badge/Cite-CITATION.cff-informational.svg)](CITATION.cff)
 <!-- Uncomment after minting a Zenodo DOI:
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
@@ -486,7 +486,7 @@ BibTeX:
   author       = {Kim, Jeein and Lee, Haewon and Lee, Juyoung and
                   Roh, Janghyun and Hwang, Euiseok},
   year         = {2026},
-  howpublished = {\url{https://github.com/lime9903/data-collection}},
+  howpublished = {\url{https://github.com/iislab0115/LabSense}},
   note         = {Version v1.0.0}
 }
 ```

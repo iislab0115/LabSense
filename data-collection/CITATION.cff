@@ -38,7 +38,7 @@ version: v1.0.0
 # NOTE: `date-released` will be updated at publication time.
 date-released: "2026-07-13"
 license: MIT
-repository-code: "https://github.com/lime9903/data-collection"
+repository-code: "https://github.com/iislab0115/LabSense"
 keywords:
   - smart home
   - occupancy detection
