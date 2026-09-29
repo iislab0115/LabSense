@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-main.py --headless 를 감싸 크래시·비정상 종료 시 자동으로 다시 띄움.
+Wraps main.py --headless and relaunches it automatically after a crash or an
+abnormal exit.
 
-장시간(수 주~한 달) 수집 시 GUI 대신 이 스크립트 사용을 권장합니다.
-로그: config.json 의 LOG_FILE 과 같은 디렉터리에 launcher_persistent.log
+For long runs (weeks to a month) prefer this script over the GUI.
+Log: launcher_persistent.log, in the same directory as LOG_FILE in config.json
 
-환경 변수:
-  PERSISTENT_RESTART_SEC — 재시작 대기 초 (기본 15)
+Environment variables:
+  PERSISTENT_RESTART_SEC - seconds to wait before restarting (default 15)
 """
 
 from __future__ import annotations
@@ -62,7 +63,7 @@ def main() -> None:
     main_py = ROOT / "main.py"
     py = sys.executable
     log.info(
-        "영구 런처 시작 — %s %s --headless (재시작 대기 %ss, 로그 %s)",
+        "Persistent launcher started: %s %s --headless (restart wait %ss, log %s)",
         py,
         main_py,
         restart_sec,
@@ -70,7 +71,7 @@ def main() -> None:
     )
 
     while True:
-        log.info("수집 프로세스 시작")
+        log.info("Collector process started")
         try:
             proc = subprocess.run(
                 [str(py), str(main_py), "--headless"],
@@ -78,20 +79,20 @@ def main() -> None:
             )
             retcode = proc.returncode
         except KeyboardInterrupt:
-            log.info("런처 Ctrl+C — 종료합니다.")
+            log.info("Launcher received Ctrl+C, exiting.")
             break
         if retcode == 0:
-            log.info("수집기 정상 종료(exit=0) — 런처를 종료합니다. 다시 켜려면 이 스크립트를 재실행하세요.")
+            log.info("Collector exited normally (exit=0); the launcher is stopping. Re-run this script to start again.")
             break
         log.warning(
-            "수집 프로세스 비정상 종료 (exit=%s). %ss 후 재시작합니다.",
+            "Collector exited abnormally (exit=%s). Restarting in %ss.",
             retcode,
             restart_sec,
         )
         try:
             time.sleep(restart_sec)
         except KeyboardInterrupt:
-            log.info("런처 Ctrl+C — 종료합니다.")
+            log.info("Launcher received Ctrl+C, exiting.")
             break
 
 

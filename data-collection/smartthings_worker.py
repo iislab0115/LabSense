@@ -1,10 +1,10 @@
 """
-SmartThings 수집 워커 (plug-collection 통합용)
+SmartThings collection worker (for the data-collection bundle)
 
-원본: smartthings-collector/smartthings_collector.py
-- 통합 실행 시 `SMARTTHINGS_EMBEDDED=1` 로 콘솔 로그 중복을 줄일 수 있음.
-- Shelly가 관리하는 SMP 라벨(`shelly_collector.DEVICES`)은 여기서 건너뜀.
-- 그 외 `SMP*` 라벨은 SmartThings에서 `stplug` 로 수집(상한 없음).
+Origin: smartthings-collector/smartthings_collector.py
+- Under unified execution, `SMARTTHINGS_EMBEDDED=1` reduces duplicate console logs.
+- SMP labels owned by Shelly (`shelly_collector.DEVICES`) are skipped here.
+- Any other `SMP*` label is collected from SmartThings as `stplug` (no cap).
 
 === Program Overview ===
 1. Required libraries:
@@ -434,7 +434,7 @@ VACUUM_CSV_HEADER = [
 
 
 def _st_capability_attr_string(main: dict, capability_id: str, attribute: str) -> str:
-    """components.main 에서 capability.attribute.value 문자열 추출."""
+    """Extract the capability.attribute.value string from components.main."""
     cap = main.get(capability_id)
     if not isinstance(cap, dict):
         return ""
@@ -452,7 +452,8 @@ def _st_capability_attr_string(main: dict, capability_id: str, attribute: str) -
 
 
 def _migrate_vacuum_csv_to_latest(filepath: str) -> None:
-    """구버전(5~8열) → 현재 VACUUM_CSV_HEADER 길이로 패딩 후 덮어쓰기."""
+    """Pad an older 5-8 column file out to the current VACUUM_CSV_HEADER width
+    and rewrite it."""
     if not os.path.isfile(filepath) or os.path.getsize(filepath) == 0:
         return
     try:
@@ -479,7 +480,8 @@ def _migrate_vacuum_csv_to_latest(filepath: str) -> None:
 
 
 def save_vacuum_to_csv(device_status, device_id):
-    """스틱 청소기: 전력/에너지 + 클리너·먼지통 상태 + lastEmptiedTime (매 주기)."""
+    """Stick vacuum: power and energy, cleaner and dustbin state, and
+    lastEmptiedTime, on every cycle."""
     global current_date
     today_date  = datetime.now().strftime("%Y%m%d")
     folder_path = os.path.join(CSV_BASE_DIR, today_date)
@@ -539,8 +541,8 @@ def save_vacuum_to_csv(device_status, device_id):
 def save_plug_to_csv(device_status, device_id):
     """Save SmartThings smart plug data: switch on/off + power + energy.
 
-    헤더는 dashboard._load_plug_csv 가 인식하는 'Timestamp / Power (W) / Energy (Wh)'
-    를 포함하여 Shelly 플러그 그래프 코드를 그대로 재사용하도록 한다.
+    The header carries 'Timestamp / Power (W) / Energy (Wh)', which
+    dashboard._load_plug_csv recognises, so the Shelly plug graph code is reused as is.
     """
     global current_date
     today_date  = datetime.now().strftime("%Y%m%d")
@@ -740,10 +742,10 @@ def _is_camera_device(device: dict) -> bool:
 
 
 def _shelly_plug_labels() -> set:
-    """Shelly 가 직접 관리하는 SMP 라벨 set (대문자).
+    """The set of SMP labels Shelly owns directly (upper case).
 
-    shelly_collector.DEVICES 가 정답이며, 그곳에 없는 SMP* 라벨은
-    SmartThings API 를 통해 수집한다. 모듈 import 실패 시 빈 set 반환.
+    shelly_collector.DEVICES is authoritative; any SMP* label absent from it is
+    collected through the SmartThings API. Returns an empty set if the import fails.
     """
     try:
         import shelly_collector as _sc
@@ -755,8 +757,9 @@ def _shelly_plug_labels() -> set:
 async def fetch_device_list(session):
     """Fetch device list and update metadata.
     - Smart plugs (SMP*):
-        · shelly_collector.DEVICES 에 라벨이 있으면 → skip (Shelly 가 1초 주기로 수집)
-        · 그 외 SMP* 라벨 → type="stplug" 로 등록 (SmartThings status 60초 폴링만)
+        - label present in shelly_collector.DEVICES: skip (Shelly polls it at 1 s)
+        - any other SMP* label: register as type="stplug" (SmartThings status,
+          polled at 60 s only)
     - Motion sensors: starting with MS (or name contains "motion")
     - Door sensors  : starting with DS (contact sensor)
     - Cameras       : detected by profile/name/label/type, stored in camera_metadata (events only)
@@ -817,9 +820,9 @@ async def fetch_device_list(session):
             logging.info(f"Camera detected: {label_u} (ID={device_id})")
             continue
 
-        # SMP 라벨:
-        #  - shelly_collector.DEVICES 에 있는 라벨 → Shelly 가 1초 단위 수집 (skip)
-        #  - 그 외 → SmartThings API 폴링 (stplug)
+        # SMP labels:
+        #  - present in shelly_collector.DEVICES: Shelly collects at 1 s (skip)
+        #  - otherwise: polled through the SmartThings API (stplug)
         if is_plug:
             if label_up in shelly_labels:
                 continue
@@ -956,7 +959,7 @@ async def fetch_vacuum_power(session, device):
 
     main = data.get("components", {}).get("main", {})
 
-    # 삼성 스틱: 클리너/먼지통 상태 (상태 변화는 CSV에 매 주기 기록)
+    # Samsung stick vacuum: cleaner and dustbin state, written every cycle
     cleaner_state = _st_capability_attr_string(main, "samsungce.stickCleanerStatus", "operatingState")
     dustbin_state = _st_capability_attr_string(main, "samsungce.stickCleanerDustbinStatus", "operatingState")
     dustbin_last_emptied = _st_capability_attr_string(
@@ -977,7 +980,7 @@ async def fetch_vacuum_power(session, device):
     except Exception:
         pass
 
-    # Try common paths for power only (energy는 위 객체에서만 사용)
+    # Try common paths for power only; energy comes from the object above
     candidates = [
         ("powerConsumptionReport", "powerConsumption"),
         ("powerConsumptionReport", "power"),
@@ -1005,7 +1008,7 @@ async def fetch_vacuum_power(session, device):
                 except ValueError:
                     pass
 
-    # Fallback: power만 (energy는 건드리지 않음)
+    # Fallback: power only, leaving energy untouched
     if power_val is None and "powerConsumptionReport" in main:
         pcr = main.get("powerConsumptionReport") or {}
         pc = pcr.get("powerConsumption") or {}
@@ -1014,7 +1017,7 @@ async def fetch_vacuum_power(session, device):
             power_val = _num_from_pc_attr(v.get("power"))
 
     if power_val is None and "powerConsumptionReport" in main:
-        # 마지막 수단: 중첩 dict에서 'power' 키만 찾기
+        # Last resort: look for a 'power' key anywhere in the nested dict
         def _find_power_key(obj):
             if isinstance(obj, dict):
                 if "power" in obj and obj.get("power") is not None:
@@ -1029,7 +1032,7 @@ async def fetch_vacuum_power(session, device):
 
     if power_val is None and energy_val is None:
         logging.warning(
-            f"[Vacuum] powerConsumptionReport 에서 power/energy 를 찾지 못함: {device['label']} "
+            f"[Vacuum] no power/energy in powerConsumptionReport: {device['label']} "
             f"(main caps={list(main.keys())})"
         )
         return None
@@ -1052,14 +1055,15 @@ async def fetch_vacuum_power(session, device):
 
 
 async def fetch_plug_status(session, device):
-    """SmartThings 스마트 플러그 한 개 폴링.
+    """Poll a single SmartThings smart plug.
 
     - main.switch.switch.value          : 'on' / 'off'
-    - main.powerMeter.power.value       : 순시 전력 (W)
-    - main.energyMeter.energy.value     : 누적 에너지 (kWh 또는 Wh, unit 으로 판별)
+    - main.powerMeter.power.value       : instantaneous power (W)
+    - main.energyMeter.energy.value     : cumulative energy (kWh or Wh, per unit)
     - main.powerConsumptionReport.powerConsumption.value.{power,energy} : fallback
 
-    Shelly 플러그(SMP01~12) 와 CSV 헤더가 호환되도록 'Power (W)' / 'Energy (Wh)' 단위로 정규화.
+    Normalised to 'Power (W)' / 'Energy (Wh)' so the CSV header stays compatible
+    with the Shelly plug files.
     """
     device_id = device["id"]
     if device_id in ban_list:
@@ -1086,7 +1090,7 @@ async def fetch_plug_status(session, device):
     if isinstance(pm_attr, dict):
         power_val = _num_from_pc_attr(pm_attr.get("value"))
 
-    # energyMeter.energy (unit 이 kWh 면 Wh 로 환산)
+    # energyMeter.energy, converted to Wh when the unit is kWh
     em = main.get("energyMeter") or {}
     em_attr = em.get("energy") or {}
     if isinstance(em_attr, dict):
@@ -1096,7 +1100,7 @@ async def fetch_plug_status(session, device):
             if unit == "kwh":
                 energy_val = e_raw * 1000.0
             else:
-                # 'wh' 또는 unit 누락: 그대로 사용
+                # 'wh', or no unit at all: use the value as is
                 energy_val = e_raw
 
     # Fallback: powerConsumptionReport.powerConsumption.value = { power, energy(Wh), ... }
@@ -1111,7 +1115,7 @@ async def fetch_plug_status(session, device):
 
     if switch_val == "" and power_val is None and energy_val is None:
         logging.warning(
-            f"[Plug] switch/power/energy 어느 것도 읽지 못함: {device['label']} "
+            f"[Plug] could not read switch, power or energy: {device['label']} "
             f"(main caps={list(main.keys())})"
         )
         return None
@@ -1417,7 +1421,7 @@ async def fetch_camera_events(session):
 async def collection_loop(session):
     """
     Single 60-second loop:
-    - Motion / Door / Vacuum / Camera / SmartThings plugs (stplug, SMP* Shelly 제외)
+    - Motion / Door / Vacuum / Camera / SmartThings plugs (stplug; Shelly SMP* excluded)
     """
     global last_update_time
 
@@ -1648,7 +1652,7 @@ def shutdown_handler(signum, frame):
 
 
 def request_stop():
-    """통합 런처에서 호출: 스케줄러 루프 정상 종료."""
+    """Called by the unified launcher to stop the scheduler loop cleanly."""
     global running
     running = False
 

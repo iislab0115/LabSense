@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-통합 데스크톱 대시보드 (tkinter)
+Unified desktop dashboard (tkinter)
 
-- Shelly: 실시간 SMP (shelly_collector.dashboard_state)
-- SmartThings: CSV_BASE_DIR 아래 MS#/DS#/Vacuum/Camera 파일 주기적 표시
-- 더블클릭: 기기 유형별 그래프
+- Shelly: live SMP state (shelly_collector.dashboard_state)
+- SmartThings: MS#/DS#/Vacuum/Camera files under CSV_BASE_DIR, refreshed periodically
+- Double-click: a graph per device type
 """
 
 import os
@@ -22,7 +22,8 @@ import logging
 
 import matplotlib
 
-# SMP 실시간 상태는 항상 이 모듈의 dashboard_state (main.py가 넘기는 collector와 동일 객체)
+# Live SMP state always comes from this module's dashboard_state, which is the
+# same object main.py hands over as the collector
 def _shelly_dashboard_state():
     try:
         import shelly_collector as sc
@@ -33,7 +34,7 @@ def _shelly_dashboard_state():
 
 
 def _smartthings_dashboard_state():
-    """SmartThings 워커의 dashboard_state. plug(stplug) 행 합산에 사용."""
+    """The SmartThings worker's dashboard_state, used to total the plug (stplug) rows."""
     try:
         import smartthings_worker as st
 
@@ -43,7 +44,7 @@ def _smartthings_dashboard_state():
 
 
 def _smartthings_device_metadata():
-    """첫 사이클 전이라도 등록된 stplug 개수를 알아내기 위한 fallback."""
+    """Fallback that gives the registered stplug count even before the first cycle."""
     try:
         import smartthings_worker as st
 
@@ -75,13 +76,15 @@ PURPLE = "#a78bfa"
 ORANGE = "#fb923c"
 CYAN = "#38bdf8"
 
-# SmartThings CSV 새로고침 주기(ms)
+# SmartThings CSV refresh period (ms)
 ST_CSV_REFRESH_MS = 5000
 
-# Plug 그래프: Shelly 1Hz × 며칠이면 포인트가 수십만 개가 되어 Tk/matplotlib 가 멈춘 것처럼 보일 수 있음 → 렌더링만 상한.
+# Plug graph: Shelly at 1 Hz over several days is hundreds of thousands of points,
+# which can make Tk/matplotlib look frozen, so cap the rendering only.
 _PLUG_GRAPH_MAX_POINTS = 22000
 
-# 플러그 플롯 전용 시간 버킷(초). Shelly는 1Hz라 묶음 필요, SmartThings는 폴링이 드물어 같은 정책이어도 점 간격은 길어짐.
+# Time bucket (s) for plug plots only. Shelly at 1 Hz needs bucketing; SmartThings
+# polls rarely, so the same policy simply yields wider spacing.
 def _plug_plot_bucket_sec(days: int) -> float:
     if days <= 1:
         return 10.0
@@ -100,7 +103,8 @@ def _safe_float(x, default=0.0):
 
 
 def _parse_csv_float_or_nan(val):
-    """CSV 셀 → float. 빈 문자열·파싱 실패는 nan (플롯 시 선이 끊김)."""
+    """CSV cell to float. An empty string or a parse failure becomes nan, which
+    breaks the line in the plot."""
     if val is None:
         return math.nan
     s = str(val).strip()
@@ -113,7 +117,8 @@ def _parse_csv_float_or_nan(val):
 
 
 def _aggregate_plug_plot_series(timestamps, powers, energies, bucket_sec=1.0):
-    """플롯용 시간 버킷. 버킷 내 전력=max(유한), 에너지=마지막 유한값. CSV 보간·스파이크 제거 없음."""
+    """Time bucket for plotting: power is the max finite value in the bucket and
+    energy the last finite one. The CSV itself is neither interpolated nor despiked."""
     if not timestamps:
         return [], [], []
     rows = sorted(zip(timestamps, powers, energies), key=lambda x: x[0])
@@ -150,7 +155,8 @@ def _aggregate_plug_plot_series(timestamps, powers, energies, bucket_sec=1.0):
 
 
 def _cap_plug_plot_points(timestamps, powers, energies, max_points=_PLUG_GRAPH_MAX_POINTS):
-    """그래프 렌더링만 포인트 수 제한(원본 CSV·통계 의미는 유지하지 않고 화면 반응성용)."""
+    """Cap the point count for rendering only; this is for UI responsiveness and
+    does not preserve the meaning of the original CSV or of any statistic."""
     if max_points <= 0 or len(timestamps) <= max_points:
         return timestamps, powers, energies
     step = int(math.ceil(len(timestamps) / max_points))
@@ -170,7 +176,8 @@ def _parse_ts(ts_raw):
 
 
 def _csv_base_dir(collector_module):
-    """SmartThings가 실제로 쓰는 경로와 동일해야 MS/DS 등 CSV가 모두 보인다."""
+    """Must match the path SmartThings actually writes to, or the MS/DS CSVs
+    will not all appear."""
     try:
         import smartthings_worker as st
 
@@ -184,7 +191,7 @@ def _csv_base_dir(collector_module):
 
 
 def _parse_st_csv_stem(stem: str):
-    """{Label}_{device_id}_{YYYYMMDD} 또는 Camera_{YYYYMMDD} stem 파싱."""
+    """Parse a {Label}_{device_id}_{YYYYMMDD} or Camera_{YYYYMMDD} stem."""
     if stem.startswith("Camera_"):
         rest = stem[len("Camera_") :]
         if rest.isdigit() and len(rest) == 8:
@@ -196,7 +203,7 @@ def _parse_st_csv_stem(stem: str):
 
 
 def _st_tree_iid(kind: str, fpath: str, display_label: str) -> str:
-    """Treeview iid는 항목마다 유일해야 함(라벨이 겹쳐도 OK)."""
+    """A Treeview iid must be unique per item; duplicate labels are fine."""
     stem = Path(fpath).stem
     lbl, dev_id, _ = _parse_st_csv_stem(stem)
     label_for_graph = display_label or lbl
@@ -207,7 +214,7 @@ def _st_tree_iid(kind: str, fpath: str, display_label: str) -> str:
 
 
 def _label_from_motion_door_vacuum_iid(iid_str: str, kind: str) -> str:
-    """motion::/door::/vacuum:: iid → 그래프용 라벨 (첫 번째 필드)."""
+    """motion::/door::/vacuum:: iid to a graph label (the first field)."""
     s = str(iid_str)
     prefix = f"{kind}::"
     if not s.startswith(prefix):
@@ -217,7 +224,7 @@ def _label_from_motion_door_vacuum_iid(iid_str: str, kind: str) -> str:
 
 
 def _csv_paths_under(base: Path) -> list[Path]:
-    """Windows에서 glob.glob('**')보다 rglob이 안정적."""
+    """rglob is more reliable than glob.glob('**') on Windows."""
     try:
         base = base.expanduser().resolve()
     except OSError:
@@ -231,7 +238,8 @@ def _csv_paths_under(base: Path) -> list[Path]:
 
 
 def _dedupe_latest_per_stem_device(paths: list[Path]) -> list[Path]:
-    """Label_deviceId_YYYYMMDD 패턴이 같으면(다른 날짜 파일) mtime 최신만."""
+    """For the same Label_deviceId_YYYYMMDD pattern across dates, keep only the
+    most recent by mtime."""
     groups: dict[tuple[str, str], tuple[float, Path]] = {}
     for p in paths:
         stem = p.stem
@@ -248,7 +256,8 @@ def _dedupe_latest_per_stem_device(paths: list[Path]) -> list[Path]:
 
 
 def _tree_label_from_st_path(fpath: str) -> str:
-    """테이블 Label 컬럼: CSV 안의 Label(중복될 수 있음)보다 파일명 기준을 우선."""
+    """Label column of the table: prefer the file name over the Label inside the
+    CSV, which can be duplicated."""
     stem = Path(fpath).stem
     lbl, dev_id, _ = _parse_st_csv_stem(stem)
     if lbl and dev_id:
@@ -263,7 +272,8 @@ class Dashboard(tk.Tk):
         super().__init__()
         self.collector = collector_module
         self._csv_base = _csv_base_dir(collector_module)
-        # _read_last_csv_row: (mtime, row_dict) — 대용량 CSV 전체 로드 방지 + 동일 파일 반복 읽기 감소
+        # _read_last_csv_row: (mtime, row_dict). Avoids loading a large CSV in full
+        # and re-reading the same file repeatedly.
         self._last_row_cache: dict[str, tuple[float, dict | None]] = {}
         self._last_row_cache_max = 4096
         self.title("Integrated Data Collector (Shelly + SmartThings)")
@@ -448,7 +458,8 @@ class Dashboard(tk.Tk):
 
     def _refresh(self):
         try:
-            # SMP 카드/테이블은 항상 shelly_collector.dashboard_state (수집 스레드가 갱신)
+            # The SMP card and table always come from shelly_collector.dashboard_state,
+            # which the collection thread updates
             state = _shelly_dashboard_state()
             st_state = _smartthings_dashboard_state()
 
@@ -456,7 +467,7 @@ class Dashboard(tk.Tk):
             self.lbl_status.config(text=status)
             self.dot.config(fg=GREEN if status == "Collecting" else YELLOW)
 
-            # ---- SMP 카드 합산: Shelly (1s) + SmartThings stplug (60s polling) ----
+            # ---- SMP card total: Shelly (1 s) + SmartThings stplug (60 s polling) ----
             sh_total = int(state.get("total", 0) or 0)
             sh_ok    = int(state.get("success", 0) or 0)
             sh_fail  = int(state.get("fail", 0) or 0)
@@ -469,8 +480,8 @@ class Dashboard(tk.Tk):
             st_plug_ok    = sum(1 for d in st_plug_rows if d.get("status") == "OK")
             st_plug_fail  = sum(1 for d in st_plug_rows if d.get("status") == "Fail")
 
-            # SmartThings 워커가 아직 첫 사이클을 돌리지 않아 devices 가 비어 있으면,
-            # device_metadata 에 등록된 stplug 개수를 total fallback 으로 사용.
+            # If the SmartThings worker has not run its first cycle yet and devices
+            # is empty, fall back to the stplug count registered in device_metadata.
             if st_plug_total == 0:
                 st_plug_total = sum(
                     1 for d in _smartthings_device_metadata() if d.get("type") == "stplug"
@@ -482,9 +493,9 @@ class Dashboard(tk.Tk):
 
             self.tree.delete(*self.tree.get_children())
 
-            # 같은 iid 가 한 사이클 안에서 두 번 등장하면 tk.TclError 가 나면서
-            # _refresh 전체가 try/except 에 잡혀 motion/door 등 뒤 행이 사라진다.
-            # 한 행 실패가 전체에 영향 주지 않도록 헬퍼로 감싼다.
+            # The same iid appearing twice in one cycle raises tk.TclError, which the
+            # outer try/except swallows, so the motion/door rows after it disappear.
+            # Wrap each row in a helper so one failure does not affect the rest.
             def _safe_insert(iid, values, tags):
                 try:
                     self.tree.insert("", "end", iid=iid, values=values, tags=tags)
@@ -515,7 +526,7 @@ class Dashboard(tk.Tk):
                     tags=(tag, "plug"),
                 )
 
-            # --- SmartThings: CSV에서 요약 ---
+            # --- SmartThings: summarise from the CSVs ---
             for row in self._discover_st_rows():
                 iid = row.get("iid") or f"{row['kind']}::{row['label']}"
                 tag = row.get("tag", "st_motion")
@@ -542,10 +553,11 @@ class Dashboard(tk.Tk):
             logging.error(f"Dashboard refresh error: {e}")
 
     def _discover_st_rows(self):
-        """CSV_BASE_DIR에서 SMP(SmartThings)/MS/DS/Vacuum/Camera 요약 행 생성.
+        """Build the SMP (SmartThings) / MS / DS / Vacuum / Camera summary rows from
+        CSV_BASE_DIR.
 
-        SmartThings 플러그: 파일명이 SMP* 이면서 shelly_collector.DEVICES 에
-        등록되지 않은 라벨만 대상으로 한다(중복 방지).
+        SmartThings plugs: only labels whose file name is SMP* and which are NOT
+        registered in shelly_collector.DEVICES, to avoid duplicates.
         """
         rows = []
         base = Path(self._csv_base)
@@ -554,8 +566,9 @@ class Dashboard(tk.Tk):
 
         all_csv = _csv_paths_under(base)
 
-        # Shelly 가 직접 다루는 SMP 라벨 (대문자) — 이 라벨은 plug:: 행이
-        # 이미 _refresh() 에서 shelly_collector.dashboard_state 로부터 들어가므로 제외.
+        # SMP labels Shelly handles directly (upper case). Their plug:: rows are
+        # already inserted by _refresh() from shelly_collector.dashboard_state, so
+        # they are excluded here.
         try:
             import shelly_collector as _sc
 
@@ -565,7 +578,7 @@ class Dashboard(tk.Tk):
         except Exception:
             shelly_plug_labels = set()
 
-        # Smart plug (SmartThings): SMP* 중 Shelly 가 관리하지 않는 라벨만
+        # Smart plugs (SmartThings): only SMP* labels Shelly does not own
         plug_paths = [
             p
             for p in all_csv
@@ -574,10 +587,11 @@ class Dashboard(tk.Tk):
         ]
         plug_paths = _dedupe_latest_per_stem_device(plug_paths)
 
-        # 추가 dedupe: 같은 라벨로 device_id 가 달라 옛 CSV 가 함께 남아있는 경우
-        # (예: 3월에 SMP16=ABC 였다가 오늘 SMP16=XYZ 로 새로 등록) → mtime 최신 1개만 사용.
-        # 그렇지 않으면 plug::SMP16 iid 가 두 번 insert 되어 Tree 충돌 → _refresh 예외 →
-        # 그 시점 이후의 motion/door/vacuum/camera 행이 모두 그려지지 않는 회귀가 발생한다.
+        # Extra dedupe: the same label can have an older CSV under a different
+        # device_id (e.g. SMP16=ABC in March, re-registered today as SMP16=XYZ),
+        # so keep only the most recent by mtime.
+        # Otherwise the plug::SMP16 iid is inserted twice, the Tree raises, _refresh
+        # aborts, and every motion/vacuum/camera row after that point goes missing.
         latest_per_label: dict[str, tuple[float, "Path"]] = {}
         for p in plug_paths:
             label_key = _tree_label_from_st_path(str(p)).upper()
@@ -607,7 +621,7 @@ class Dashboard(tk.Tk):
                 "source": "SmartThings",
             })
 
-        # Motion: 파일명이 MS로 시작 (SMP는 Shelly — 이름이 MS로 시작하지 않음)
+        # Motion: file name starts with MS (SMP belongs to Shelly and never does)
         motion_paths = [p for p in all_csv if p.name.upper().startswith("MS")]
         motion_paths = _dedupe_latest_per_stem_device(motion_paths)
         for p in motion_paths:
@@ -645,7 +659,8 @@ class Dashboard(tk.Tk):
                 "tag": "st_door",
             })
 
-        # Vacuum: 파일명에 vacuum (Camera 및 과거 dustbin_events 보조 CSV 제외)
+        # Vacuum: file name contains vacuum (excluding Camera and the old
+        # dustbin_events helper CSVs)
         vac_paths = [
             p
             for p in all_csv
@@ -655,7 +670,7 @@ class Dashboard(tk.Tk):
         ]
         vac_paths = _dedupe_latest_per_stem_device(vac_paths)
 
-        # 라벨 단위 추가 dedupe (Plug 와 동일한 가드: 옛 device_id CSV 자동 무시)
+        # Per-label dedupe, the same guard as for plugs: ignore old device_id CSVs
         latest_per_label_vac: dict[str, tuple[float, "Path"]] = {}
         for p in vac_paths:
             label_key = _tree_label_from_st_path(str(p)).upper()
@@ -685,7 +700,7 @@ class Dashboard(tk.Tk):
                 "tag": "st_vacuum",
             })
 
-        # Camera: Camera_YYYYMMDD.csv (한 파일에 여러 카메라 행)
+        # Camera: Camera_YYYYMMDD.csv, with several camera rows per file
         cam_files = sorted([p for p in all_csv if p.name.upper().startswith("CAMERA_")])
         if cam_files:
             fpath = str(cam_files[-1])
@@ -709,7 +724,8 @@ class Dashboard(tk.Tk):
         return rows
 
     def _read_last_csv_row(self, fpath):
-        """마지막 데이터 행만 사용. 전체를 list(DictReader)로 올리면 고주기·대용량 CSV에서 메모리 부족 유발."""
+        """Use only the last data row. Materialising the whole file with
+        list(DictReader) exhausts memory on high-rate, large CSVs."""
         try:
             mtime = os.path.getmtime(fpath)
         except OSError:
@@ -791,11 +807,11 @@ class Dashboard(tk.Tk):
         return label, detail, updated, True
 
     def _last_row_plug(self, fpath):
-        """SmartThings 플러그 CSV 의 마지막 행 → 대시보드 detail 문자열.
+        """Last row of a SmartThings plug CSV, as the dashboard detail string.
 
-        헤더: Timestamp, Label, Location, Room, Switch, Power (W), Energy (Wh)
-        Shelly 플러그 카드와 같은 형식이 되도록 'power / energy' 를 보여주고,
-        ON/OFF 상태는 앞에 추가한다.
+        Header: Timestamp, Label, Location, Room, Switch, Power (W), Energy (Wh)
+        Shows 'power / energy' so the card matches the Shelly plug cards, with the
+        ON/OFF state prefixed.
         """
         label = _tree_label_from_st_path(fpath)
         row = self._read_last_csv_row(fpath)
@@ -861,10 +877,10 @@ class Dashboard(tk.Tk):
         detail = f"last: {cam}  |  motion={mot or '-'}  |  sound={snd or '-'}"
         return {"detail": detail, "updated": updated, "ok": True}
 
-    # ---- CSV 로드 (그래프) ----
+    # ---- CSV loading (for the graphs) ----
 
     def _find_csv_files(self, label):
-        """glob ** 대신 rglob — Windows에서 누락 방지."""
+        """rglob instead of glob **, which misses files on Windows."""
         prefix = f"{label}_"
         return sorted(
             str(p) for p in _csv_paths_under(Path(self._csv_base)) if p.name.startswith(prefix)
@@ -899,7 +915,8 @@ class Dashboard(tk.Tk):
             timestamps = list(timestamps)
             powers = list(powers)
             energies = list(energies)
-            # 플롯만 동일한 시간 버킷(일 수에 따라 10/30/60초) + 점 수 상한. CSV 원본과 무관.
+            # Plot only: the same time bucket (10/30/60 s by span) plus a point cap.
+            # The CSV itself is untouched.
             bsec = _plug_plot_bucket_sec(days)
             timestamps, powers, energies = _aggregate_plug_plot_series(
                 timestamps, powers, energies, bucket_sec=bsec

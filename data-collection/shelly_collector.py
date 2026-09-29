@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Shelly Plug 12개 데이터 수집 프로그램
-- 1초 간격 수집
-- 일별 파일 자동 생성
-- 에러 복구 기능
-- 중단 후 재시작 가능
+Shelly plug data collection program
+- 1-second polling interval
+- daily files created automatically
+- error recovery
+- can be restarted after an interruption
 """
 
 import requests
@@ -21,7 +21,7 @@ import sys
 import threading
 
 # ============================================
-# 설정
+# Settings
 # ============================================
 
 
@@ -67,11 +67,11 @@ DEVICES = _devices_from_config(CONFIG, CONFIG_PATH)
 # Collection settings
 INTERVAL = float(CONFIG.get("SHELLY_INTERVAL", 1.0))  # polling interval, default 1 s
 TIMEOUT = float(CONFIG.get("SHELLY_TIMEOUT", 4.0))    # HTTP timeout, allows for Wi-Fi latency
-MAX_RETRIES = 3  # 재시도 횟수
+MAX_RETRIES = 3  # retry count
 
-# GUI(또는 프로그램 출력)용 주기
+# Refresh period for the GUI (or console output)
 UI_UPDATE_EVERY_SECONDS = 5.0
-# 파일 flush 주기(너무 잦으면 I/O 부담이 커짐)
+# Flush period; flushing too often costs I/O
 FLUSH_EVERY_SAMPLES = 10
 
 _csv_base = CONFIG.get("CSV_BASE_DIR", "")
@@ -83,11 +83,11 @@ if not _csv_base or "Please enter" in str(_csv_base):
 CSV_BASE_DIR = Path(_csv_base)
 CSV_BASE_DIR.mkdir(parents=True, exist_ok=True)
 
-# logs 저장 경로
+# Log directory
 LOG_DIR = CSV_BASE_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-# dashboard 상태(launcher에서 읽어 UI 갱신)
+# Dashboard state, read by the launcher to refresh the UI
 dashboard_state = {
     "status": "Initializing",
     "last_cycle": None,
@@ -97,15 +97,16 @@ dashboard_state = {
     "devices": [],  # [{label, power, energy, status, updated}, ...]
 }
 
-# launcher(또는 dashboard)가 주입하는 콜백
+# Callback injected by the launcher (or the dashboard)
 on_data_updated = None
 
 # ============================================
-# 로깅 설정
+# Logging setup
 # ============================================
 
 def setup_logging():
-    """로깅 설정 (통합 실행 시 SmartThings와 root 핸들러 공유, 중복 방지)"""
+    """Logging setup. Under unified execution the root handler is shared with
+    SmartThings, which avoids duplicate records."""
     log_file = LOG_DIR / f"collector_{datetime.now().strftime('%Y%m%d')}.log"
     log_path_abs = str(log_file.resolve())
 
@@ -136,13 +137,13 @@ def setup_logging():
 logger = setup_logging()
 
 # ============================================
-# CSV 파일 관리
+# CSV file handling
 # ============================================
 
 class PlugCSVManager:
-    """SMP##별 plug CSV를 일별 폴더에 저장.
+    """Write one plug CSV per SMP## into the daily folder.
 
-    dashboard는 아래 컬럼을 기대합니다:
+    The dashboard expects the columns below:
     - Timestamp (format: %Y-%m-%d %H:%M:%S)
     - Power (W)
     - Energy (Wh)
@@ -159,7 +160,7 @@ class PlugCSVManager:
         return self.base_dir / date.strftime("%Y%m%d")
 
     def _filename(self, date, device):
-        # smartthings_collector 스타일과 비슷하게: SMPxx_<device_id>_<YYYYMMDD>.csv
+        # Same shape as smartthings_collector: SMPxx_<device_id>_<YYYYMMDD>.csv
         return f"{device['label']}_{device['id']}_{date.strftime('%Y%m%d')}.csv"
 
     def ensure_open(self, date):
@@ -201,7 +202,8 @@ class PlugCSVManager:
             return
 
         def _cell_meas(x):
-            """측정 실패 시 0을 쓰면 그래프가 실제 부하↔0 으로 지그재그로 보인다 → 빈 칸."""
+            """Write an empty cell, not 0, when a reading fails: a 0 would make the
+            graph zig-zag between the real load and zero."""
             if x is None:
                 return ""
             return float(x)
@@ -235,11 +237,11 @@ class PlugCSVManager:
         self._samples_since_flush = 0
 
 # ============================================
-# 데이터 수집
+# Data collection
 # ============================================
 
 def _parse_gen2_switch_status(data: dict):
-    """Shelly Plus 등 Gen2: /rpc/Switch.GetStatus 응답."""
+    """Gen2 devices such as Shelly Plus: /rpc/Switch.GetStatus response."""
     aenergy = data.get("aenergy") or {}
     aenergy_total = aenergy.get("total")
     try:
@@ -264,7 +266,7 @@ def _parse_gen2_switch_status(data: dict):
 
 
 def _parse_gen1_http_status(data: dict):
-    """Shelly Plug 등 Gen1: GET /status (meters[].power 등)."""
+    """Gen1 devices such as Shelly Plug: GET /status (meters[].power etc.)."""
     meters = data.get("meters") or []
     if not meters:
         return None
@@ -297,12 +299,12 @@ def _parse_gen1_http_status(data: dict):
 
 
 def get_device_data(device, retry_count=0):
-    """개별 플러그: Gen2 RPC 우선, 실패 시 Gen1 /status."""
+    """One plug: try the Gen2 RPC first, fall back to the Gen1 /status."""
     ip = device["ip"]
     label = device["label"]
     last_err = None
 
-    # Gen2 (Plus 등): Switch.GetStatus
+    # Gen2 (Plus and similar): Switch.GetStatus
     try:
         r = requests.get(f"http://{ip}/rpc/Switch.GetStatus?id=0", timeout=TIMEOUT)
         if r.status_code == 200:
@@ -312,7 +314,7 @@ def get_device_data(device, retry_count=0):
     except Exception as e:
         last_err = e
 
-    # Gen1 (Plug 등): /status
+    # Gen1 (Plug and similar): /status
     try:
         r = requests.get(f"http://{ip}/status", timeout=TIMEOUT)
         r.raise_for_status()
@@ -320,7 +322,7 @@ def get_device_data(device, retry_count=0):
         parsed = _parse_gen1_http_status(data)
         if parsed is not None:
             return parsed
-        last_err = last_err or ValueError("/status: meters 없음")
+        last_err = last_err or ValueError("/status: no meters field")
     except Exception as e:
         last_err = e
 
@@ -329,13 +331,14 @@ def get_device_data(device, retry_count=0):
         return get_device_data(device, retry_count + 1)
 
     logger.error(
-        f"{label} 연결 실패 (IP={ip}). PC와 Shelly가 같은 LAN인지, IP가 맞는지 확인. "
-        f"오류: {last_err}"
+        f"{label} unreachable (IP={ip}). Check that this machine and the Shelly are "
+        f"on the same LAN and that the address is correct. "
+        f"Error: {last_err}"
     )
     return None
 
 def collect_all_devices():
-    """12개 디바이스 데이터 한 번에 수집"""
+    """Collect from every configured device in one pass."""
     results = {}
     
     for device in DEVICES:
@@ -345,11 +348,11 @@ def collect_all_devices():
     return results
 
 # ============================================
-# 메인 수집 루프
+# Main collection loop
 # ============================================
 
 class DataCollector:
-    """데이터 수집 메인 클래스"""
+    """Main data collection class."""
     
     def __init__(self):
         self.plug_csv_manager = PlugCSVManager(CSV_BASE_DIR)
@@ -360,16 +363,17 @@ class DataCollector:
         self.last_ui_update_time = 0.0
         self.current_date = datetime.now().date()
 
-        # 일 단위 에너지 누적(Wh)
+        # Per-day cumulative energy (Wh)
         self.daily_energy_wh = {device["label"]: 0.0 for device in DEVICES}
-        # 루프 구간 증분 에너지(Wh) - NILM/윈도우 학습에 유용
+        # Per-loop incremental energy (Wh); useful for NILM and windowed learning
         self.daily_energy_inc_wh = {device["label"]: 0.0 for device in DEVICES}
-        # device의 누적 에너지(aenergy.total, Wh) 기준 마지막 값
+        # Last value of the device's cumulative energy (aenergy.total, Wh)
         self.last_energy_total = {device["label"]: None for device in DEVICES}
         self.last_sample_epoch = time.time()
         
-        # 시그널 핸들러는 메인 스레드에서만 등록 가능
-        # (main.py 등에서 Shelly를 워커 스레드로 돌릴 때는 생략 → 종료는 _stop_callback / is_running)
+        # Signal handlers can only be registered on the main thread
+        # (skipped when main.py runs Shelly on a worker thread; shutdown then
+        #  goes through _stop_callback / is_running)
         if threading.current_thread() is threading.main_thread():
             try:
                 signal.signal(signal.SIGINT, self.signal_handler)
@@ -379,12 +383,12 @@ class DataCollector:
                 pass
     
     def signal_handler(self, signum, frame):
-        """Ctrl+C 등 종료 시그널 처리"""
-        logger.info("\n종료 신호 수신. 안전하게 종료 중...")
+        """Handle Ctrl+C and other shutdown signals."""
+        logger.info("\nShutdown signal received, stopping safely...")
         self.is_running = False
     
     def update_dashboard(self, device_data, energy_by_label, now_str):
-        """GUI 테이블에 필요한 상태를 업데이트(요청 UI 주기에 맞춰 호출)."""
+        """Update the state the GUI table needs, on the requested UI period."""
         global dashboard_state
         ok_devices = 0
         fail_devices = 0
@@ -429,14 +433,14 @@ class DataCollector:
                 pass
     
     def run(self):
-        """메인 실행"""
+        """Main entry point."""
         logger.info("=" * 60)
-        logger.info("12개 Shelly Plug data collection started")
+        logger.info("Shelly plug data collection started")
         logger.info(f"interval: {INTERVAL}s")
         logger.info(f"CSV_BASE_DIR: {CSV_BASE_DIR}")
         logger.info("=" * 60)
         
-        # CSV 파일 열기
+        # Open the CSV files
         self.plug_csv_manager.ensure_open(self.current_date)
         self.start_time = time.time()
         self.daily_energy_wh = {device["label"]: 0.0 for device in DEVICES}
@@ -447,14 +451,14 @@ class DataCollector:
             while self.is_running:
                 loop_start = time.time()
                 
-                # 데이터 수집
+                # Data collection
                 device_data = collect_all_devices()
                 
-                # 타임스탬프
+                # Timestamp
                 now = datetime.now()
                 timestamp_sec = now.strftime('%Y-%m-%d %H:%M:%S')
 
-                # 날짜 바뀌면 에너지 누적 리셋 + 파일 보장
+                # On a date change, reset the energy accumulators and ensure the files exist
                 if now.date() != self.current_date:
                     self.current_date = now.date()
                     self.daily_energy_wh = {device["label"]: 0.0 for device in DEVICES}
@@ -463,15 +467,16 @@ class DataCollector:
                     self.plug_csv_manager.ensure_open(self.current_date)
                     self.last_sample_epoch = time.time()
 
-                # 실제 루프 간격(dt) 기반 에너지 누적 (Wh)
+                # Accumulate energy (Wh) from the real loop interval (dt)
                 now_epoch = time.time()
                 dt = now_epoch - self.last_sample_epoch
                 if dt <= 0:
                     dt = INTERVAL
                 self.last_sample_epoch = now_epoch
 
-                # 에너지(Wh)는 Shelly의 aenergy.total로 "증분"을 누적
-                # (에너지 카운터는 누적값이라, 이전 값과 차이를 취해 해당 루프 기간 소비량으로 변환)
+                # Energy (Wh) accumulates the increment of the Shelly aenergy.total counter
+                # (the counter is cumulative, so the difference from the previous
+                #  value gives the consumption over this loop)
                 for dev in DEVICES:
                     label = dev["label"]
                     data = device_data.get(label)
@@ -479,7 +484,7 @@ class DataCollector:
                         energy_total = float(data["energy_total"])
                         prev_total = self.last_energy_total.get(label)
                         if prev_total is None:
-                            # 첫 샘플: 기준점만 잡기
+                            # First sample: only record the baseline
                             self.last_energy_total[label] = energy_total
                             self.daily_energy_inc_wh[label] = 0.0
                         else:
@@ -488,22 +493,24 @@ class DataCollector:
                                 self.daily_energy_inc_wh[label] = delta
                                 self.daily_energy_wh[label] = self.daily_energy_wh.get(label, 0.0) + delta
                             else:
-                                # 장치 리셋/누적 에너지 롤오버 등으로 음수가 나오면 누적 기준만 갱신
+                                # A negative difference means a device reset or a counter
+                                # rollover, so only move the baseline
                                 self.daily_energy_inc_wh[label] = 0.0
                             self.last_energy_total[label] = energy_total
                     else:
-                        # 에너지 필드가 누락된 경우에만 전력 적분으로 fallback
+                        # Fall back to integrating power only when the energy field is missing
                         power_w = float(data["power"]) if data else 0.0
                         energy_inc_wh = power_w * dt / 3600.0
                         self.daily_energy_inc_wh[label] = energy_inc_wh
                         self.daily_energy_wh[label] = self.daily_energy_wh.get(label, 0.0) + energy_inc_wh
                 
-                # 첫 루프 직후 즉시 SMP 대시보드 갱신(5초 대기 없이 플러그 행이 보이도록)
+                # Refresh the SMP dashboard right after the first loop so the plug rows
+                # appear without waiting 5 s
                 if self.total_samples == 0:
                     self.last_ui_update_time = time.time()
                     self.update_dashboard(device_data, self.daily_energy_wh, timestamp_sec)
 
-                # Plug CSV(대시보드 그래프용) 쓰기
+                # Write the plug CSV used by the dashboard graph
                 for dev in DEVICES:
                     label = dev["label"]
                     data = device_data.get(label)
@@ -530,22 +537,22 @@ class DataCollector:
                     )
                 self.plug_csv_manager.flush()
                 
-                # 통계
+                # Statistics
                 self.total_samples += 1
                 
-                # 에러 카운트
+                # Error count
                 error_devices = [label for label, data in device_data.items() if data is None]
                 if error_devices:
                     self.error_count += len(error_devices)
-                    logger.warning(f"데이터 수집 실패: {', '.join(error_devices)}")
+                    logger.warning(f"collection failed: {', '.join(error_devices)}")
 
-                # GUI 상태 업데이트(주기 제한)
+                # Update the GUI state, rate-limited
                 now_ts = time.time()
                 if now_ts - self.last_ui_update_time >= UI_UPDATE_EVERY_SECONDS:
                     self.last_ui_update_time = now_ts
                     self.update_dashboard(device_data, self.daily_energy_wh, timestamp_sec)
                 
-                # 정확한 주기 유지
+                # Keep the interval accurate
                 elapsed = time.time() - loop_start
                 sleep_time = max(0, INTERVAL - elapsed)
                 
@@ -555,13 +562,13 @@ class DataCollector:
                 time.sleep(sleep_time)
         
         except Exception as e:
-            logger.error(f"예상치 못한 오류: {e}", exc_info=True)
+            logger.error(f"unexpected error: {e}", exc_info=True)
         
         finally:
             self.cleanup()
     
     def cleanup(self):
-        """종료 처리"""
+        """Shutdown handling."""
         try:
             self.plug_csv_manager.flush()
         except Exception:
@@ -570,14 +577,14 @@ class DataCollector:
         
         elapsed = time.time() - self.start_time
         logger.info("=" * 60)
-        logger.info("수집 종료")
-        logger.info(f"총 샘플: {self.total_samples}개")
-        logger.info(f"총 시간: {elapsed/3600:.2f}시간")
-        logger.info(f"오류 횟수: {self.error_count}회")
+        logger.info("collection finished")
+        logger.info(f"total samples: {self.total_samples}")
+        logger.info(f"total time: {elapsed/3600:.2f} h")
+        logger.info(f"error count: {self.error_count}")
         logger.info("=" * 60)
 
 # ============================================
-# 실행
+# Entry point
 # ============================================
 
 if __name__ == "__main__":

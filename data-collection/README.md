@@ -83,7 +83,7 @@ pip install requests pandas matplotlib aiohttp
 ### 2. Project layout
 
 ```
-plug-collection/
+data-collection/
 ├── main.py                # Unified entry point (Shelly + SmartThings + dashboard)
 ├── shelly_collector.py    # Shelly acquisition (SMP01–SMP12)
 ├── smartthings_worker.py  # SmartThings acquisition (SMP13–SMP19 / MS / DS / vacuum / camera)
@@ -483,7 +483,7 @@ BibTeX:
 @misc{kim2026ambient,
   title        = {Ambient sensor time-series data for occupancy and activity
                   recognition in a laboratory workspace},
-  author       = {Kim, Jeein and Lee, Haewon and Lee, Joyoung and
+  author       = {Kim, Jeein and Lee, Haewon and Lee, JooYoung and
                   Roh, Janghyun and Hwang, Euiseok},
   year         = {2026},
   howpublished = {\url{https://github.com/lime9903/data-collection}},
@@ -496,9 +496,9 @@ which GitHub renders as a "Cite this repository" widget.
 
 ### Authors and Affiliations
 
-- **Jeein Kim**$^{1}$, **Haewon Lee**$^{2}$, **Joyoung Lee**$^{1}$,
+- **Jeein Kim**$^{1}$, **Haewon Lee**$^{2}$, **JooYoung Lee**$^{1}$,
   **Janghyun Roh**$^{1}$, **Euiseok Hwang**$^{1,2,*}$
-- $^{1}$ Department of AI Convergence, Gwangju Institute of Science and
+- $^{1}$ Department of AI, Gwangju Institute of Science and
   Technology, Gwangju, 61005, South Korea
 - $^{2}$ Department of Electrical Engineering and Computer Science,
   Gwangju Institute of Science and Technology, Gwangju, 61005, South Korea

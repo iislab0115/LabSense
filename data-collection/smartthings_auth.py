@@ -1,7 +1,7 @@
 """
 === SmartThings Initial Authentication Script ===
 Run this script once for first-time setup.
-Token refresh is handled automatically by smartthings_worker.py (plug-collection).
+Token refresh is handled automatically by smartthings_worker.py (data-collection).
 
 Usage:
     python smartthings_auth.py

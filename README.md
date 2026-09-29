@@ -8,7 +8,7 @@ keeps its own README, requirements and history; this page explains how they fit 
 
 | Directory | What it does | Produces |
 |---|---|---|
-| [`plug-collection/`](plug-collection) | Polls Shelly smart plugs over the local network at 1 s and SmartThings devices (plugs, motion sensors, door-contact sensors, the stick vacuum, camera event channels) through the SmartThings API at 60 s. Includes a live dashboard and a supervisor that restarts a stalled collector. | `SMP*`, `MS*`, `DS*`, `Camera_*`, `Stick vacuum_*` daily CSV files |
+| [`data-collection/`](data-collection) | Polls Shelly smart plugs over the local network at 1 s and SmartThings devices (plugs, motion sensors, door-contact sensors, the stick vacuum, camera event channels) through the SmartThings API at 60 s. Includes a live dashboard and a supervisor that restarts a stalled collector. | `SMP*`, `MS*`, `DS*`, `Camera_*`, `Stick vacuum_*` daily CSV files |
 | [`har-datalogger/`](har-datalogger) | Application the three primary participants used to record activity transitions in real time, with automated refinement of the raw self-report log. | the `START`/`STOP` candidate intervals behind `activity_*.csv` |
 | [`homecam-media-converter/`](homecam-media-converter) | Converts CN Core HomeCam `.media` files to MP4 (H.264 + AAC). | the reference video used for annotation, which is **not** part of the public dataset |
 
@@ -27,7 +27,7 @@ the acquisition can be audited and reproduced.
 ## What is deliberately not here
 
 No credentials, tokens, OAuth files, collected measurements or participant identifiers are committed.
-`plug-collection/config.json` is a placeholder template; real values belong in `config.local.json`,
+`data-collection/config.json` is a placeholder template; real values belong in `config.local.json`,
 which is git-ignored. Raw video and audio are likewise absent — the converter is included, the media
 are not.
 
@@ -41,14 +41,14 @@ The **dataset** is released separately under CC BY 4.0; the two licences are not
 Each directory was imported with `git subtree`, so its upstream commits are preserved in this
 repository's history. The original repositories are:
 
-- `plug-collection/` ← <https://github.com/lime9903/data-collection>
+- `data-collection/` ← <https://github.com/lime9903/data-collection>
 - `har-datalogger/` ← <https://github.com/jyoung531/HAR-DataLogger>
 - `homecam-media-converter/` ← <https://github.com/haewonlii/homecam-media-converter>
 
 Those repositories are superseded by this one. To pull a later upstream change into a directory:
 
 ```bash
-git subtree pull --prefix=plug-collection https://github.com/lime9903/data-collection.git main --squash
+git subtree pull --prefix=data-collection https://github.com/lime9903/data-collection.git main --squash
 ```
 
 ## Citation

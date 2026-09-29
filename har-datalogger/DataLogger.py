@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import messagebox, scrolledtext, simpledialog
 import sys
 
-# --- [1. 전역 설정] ---
+# --- [1. Global settings] ---
 LABELS = {'1': "EAT_OUT", '2': "EAT_MR", '3': "MEET", '4': "W_PC", '5': "W_NPC", '6': "ABS_L", '7': "ABS_S", '8': "OTHERS", '0': "TRANSITION"}
 CATEGORIES = {
     "EATING": {"keys": ['1', '2'], "color": "#FF9500"},
@@ -29,16 +29,16 @@ NOISE_FILTER_SEC = 2
 
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
-# --- [2. 핵심 로직] ---
+# --- [2. Core logic] ---
 def get_tailscale_ip():
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r") as f:
             saved_ip = f.read().strip()
         if saved_ip:
-            msg = f"기억된 IP: {saved_ip}\n접속 주소: http://{saved_ip}:5000\n\n이 주소를 그대로 사용하시겠습니까?"
-            if messagebox.askyesno("IP 확인", msg):
+            msg = f"Remembered IP: {saved_ip}\nAddress: http://{saved_ip}:5000\n\nUse this address?"
+            if messagebox.askyesno("Confirm IP", msg):
                 return saved_ip
-    new_ip = simpledialog.askstring("새 IP 입력", "새로운 Tailscale IP를 입력하세요:")
+    new_ip = simpledialog.askstring("Enter new IP", "Enter the new Tailscale IP:")
     if new_ip:
         with open(CONFIG_FILE, "w") as f: f.write(new_ip)
         return new_ip
@@ -85,21 +85,21 @@ def toggle_user_activity(user_id, room_id, key):
         else:
             log_event(user_id, room_id, key, "START"); active_keys.add(key)
 
-# --- [3. 통합 로직 (3-Tier Output Strategy)] ---
+# --- [3. Integration logic (3-tier output strategy)] ---
 
 def run_real_merge_task(mode, target_date=None):
     if not os.path.exists(BASE_LOG_DIR): return
     all_folders = sorted([d for d in os.listdir(BASE_LOG_DIR) if os.path.isdir(os.path.join(BASE_LOG_DIR, d))])
     target_folders = []
 
-    if mode == "전체": target_folders = all_folders
+    if mode == "All": target_folders = all_folders
 
-    elif mode == "신규 폴더만":
+    elif mode == "New folders only":
         target_folders = [f for f in all_folders if not os.path.exists(os.path.join(BASE_LOG_DIR, f, f"merged_{f}.csv"))]
 
-    elif mode == "날짜 선택" and target_date:
+    elif mode == "Select date" and target_date:
         if target_date in all_folders: target_folders = [target_date]
-        else: print(f"❌ [ERROR] {target_date} 폴더 없음"); return
+        else: print(f"[ERROR] no folder for {target_date}"); return
 
     for date_str in target_folders:
         folder_path = os.path.join(BASE_LOG_DIR, date_str)
@@ -150,7 +150,7 @@ def run_real_merge_task(mode, target_date=None):
             ts_events.append({'Time': r['Start_DT'], 'Action': 'START', 'Label': r['Label'], 'Users': r['User_ID'], 'TS': r['Start']})
             ts_events.append({'Time': r['End_DT'], 'Action': 'END', 'Label': r['Label'], 'Users': r['User_ID'], 'TS': r['End']})
         pd.DataFrame(ts_events).sort_values('TS')[['Time', 'Action', 'Label', 'Users']].to_csv(os.path.join(folder_path, f"timeseries_preprocessed_{date_str}.csv"), index=False, encoding='utf-8-sig')
-        print(f"✅ {date_str}: Raw/Preprocessed/Merged 파일 생성 완료!", flush=True)
+        print(f"{date_str}: raw/preprocessed/merged files written", flush=True)
 
 # --- [4. Flask Server & Web UI] ---
 app = Flask(__name__)
@@ -171,7 +171,7 @@ STATUS_PAGE_TEMPLATE = """
     .active-tag { background: #007AFF; color: white; padding: 3px 7px; border-radius: 5px; font-size: 11px; font-weight: 600; margin: 1px; display: inline-block; }
     .console { background: #1C1C1E; color: #34C759; border-radius: 12px; padding: 15px; font-family: 'Consolas', monospace; font-size: 12px; height: 300px; overflow-y: auto; text-align: left; scroll-behavior: smooth; }
     
-    /* [MODIFIED] 간결한 다운로드 버튼 스타일 */
+    /* [MODIFIED] compact download button style */
     .btn-download-wrapper { margin-top: 25px; }
     .btn-download { display: block; background: #34C759; color: white; padding: 16px; border-radius: 14px; text-decoration: none; font-size: 17px; font-weight: 700; max-width: 250px; margin: 0 auto; box-shadow: 0 4px 10px rgba(52, 199, 89, 0.2); }
     .btn-sub-text { font-size: 11px; color: #8E8E93; margin-top: 8px; font-weight: 400; }
@@ -219,8 +219,8 @@ input { width: 90%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; 
 <div id="main-view" class="hidden"><div class="card"><div id="display-user" style="font-weight:bold"></div><div id="status-display" style="font-size: 20px; font-weight: 800; color: #007AFF; margin-top:5px;">IDLE</div></div>
 {% for cat, data in categories.items() %}<div class="category-title">{{cat}}</div><div class="grid">{% for k in data['keys'] %}
 <button id="btn-{{k}}" class="act-btn" onclick="handleClick('{{k}}')" style="--cat-color: {{data['color']}}">{{labels[k]}}</button>{% endfor %}</div>{% endfor %}
-<button onclick="window.open('/status_view', '_blank')" style="margin-top:20px; border:none; background:none; color:#007AFF; font-size:14px; text-decoration:underline;">실시간 로그 보기</button><br>
-<button onclick="location.reload()" style="margin-top:20px; border:none; background:none; color:gray; font-size:14px;">로그아웃</button></div>
+<button onclick="window.open('/status_view', '_blank')" style="margin-top:20px; border:none; background:none; color:#007AFF; font-size:14px; text-decoration:underline;">Live log</button><br>
+<button onclick="location.reload()" style="margin-top:20px; border:none; background:none; color:gray; font-size:14px;">Log out</button></div>
 <script>let user = ""; function doLogin(){ user = document.getElementById('user-name').value.trim(); if(!user) return; fetch(`/login_log?user=${user}`);
 document.getElementById('login-view').classList.add('hidden'); document.getElementById('main-view').classList.remove('hidden'); document.getElementById('display-user').innerText = user; sync(); }
 function sync() { if(user) fetch(`/status?user=${user}`).then(r => r.json()).then(d => updateUI(d)); }
@@ -237,7 +237,7 @@ def download_today():
     date_str = time.strftime("%Y%m%d")
     file_path = os.path.join(BASE_LOG_DIR, date_str, f"raw_timeseries_{date_str}.csv")
     if os.path.exists(file_path): return send_file(file_path, as_attachment=True)
-    else: return "<script>alert('통합 데이터가 아직 생성되지 않았습니다. 메인 PC에서 Integrate 버튼을 먼저 눌러주세요!'); history.back();</script>"
+    else: return "<script>alert('No integrated data yet. Press Integrate on the main PC first.'); history.back();</script>"
 
 @app.route('/login_log')
 def login_log():
@@ -274,8 +274,8 @@ class GTDashboard:
 
         tk.Label(card, text="INTEGRATION MODE", font=("Helvetica Neue", 9, "bold"), bg="#FFFFFF", fg="#8E8E93").pack(anchor="w")
         
-        self.mode_var = tk.StringVar(self.root); self.mode_var.set("신규 폴더만")
-        opt = tk.OptionMenu(card, self.mode_var, "전체", "신규 폴더만", "날짜 선택"); opt.config(bg="#F2F2F7", fg="#007AFF", font=("Helvetica Neue", 11, "bold"), relief="flat", highlightthickness=0); opt.pack(fill="x", pady=10)
+        self.mode_var = tk.StringVar(self.root); self.mode_var.set("New folders only")
+        opt = tk.OptionMenu(card, self.mode_var, "All", "New folders only", "Select date"); opt.config(bg="#F2F2F7", fg="#007AFF", font=("Helvetica Neue", 11, "bold"), relief="flat", highlightthickness=0); opt.pack(fill="x", pady=10)
         
         self.btn_merge = tk.Button(card, text="Integrate Data", command=self.start_merge, bg="#34C759", fg="white", font=("Helvetica Neue", 12, "bold"), height=2, relief="flat", cursor="hand2"); self.btn_merge.pack(fill="x", pady=10)
         self.btn_qr = tk.Button(card, text="Show QR Code", command=self.show_qr_popup, bg="#AF52DE", fg="white", font=("Helvetica Neue", 12, "bold"), height=2, relief="flat"); self.btn_qr.pack(fill="x")
@@ -293,12 +293,12 @@ class GTDashboard:
         self.btn_server.config(state="disabled", text="● Online", bg="#E5E5EA", fg="#8E8E93")
         threading.Thread(target=lambda: app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False), daemon=True).start()
 
-        print(f"🚀 [SYSTEM] 서버 가동 중.. 로그 확인 : http://{self.server_ip}:5000/status_view")
+        print(f"[SYSTEM] server running; log at http://{self.server_ip}:5000/status_view")
 
 
     def start_merge(self):
-        m = self.mode_var.get(); t = simpledialog.askstring("날짜 선택", "YYYYMMDD:") if m == "날짜 선택" else None
-        print(f"🔄 [PROCESS] Integrate & Refine 시작"); threading.Thread(target=lambda: run_real_merge_task(m, t), daemon=True).start()
+        m = self.mode_var.get(); t = simpledialog.askstring("Select date", "YYYYMMDD:") if m == "Select date" else None
+        print(f"[PROCESS] integrate and refine started"); threading.Thread(target=lambda: run_real_merge_task(m, t), daemon=True).start()
 
 
     def show_qr_popup(self):
