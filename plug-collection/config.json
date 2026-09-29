@@ -16,6 +16,14 @@
     "BAN_LIST_FILE": "Please enter the absolute path for the ban list, e.g. D:/smartthings_data/ban_list.json",
     "CLIP_DIR": "Please enter the base directory for camera clips, e.g. D:/smartthings_data/clips",
 
+    "_comment_3": "Shelly plugs are polled directly over the local network, so each one needs its own address. Replace the entries below with your own devices; 'label' becomes the CSV file prefix and 'id' is the device identifier reported by the plug.",
+    "SHELLY_DEVICES": [
+        { "label": "SMP01", "id": "Please enter the device id", "ip": "Please enter the device IP, e.g. 192.168.0.10" },
+        { "label": "SMP02", "id": "Please enter the device id", "ip": "Please enter the device IP, e.g. 192.168.0.11" }
+    ],
+    "SHELLY_INTERVAL": 1.0,
+    "SHELLY_TIMEOUT": 4.0,
+
     "DEVICE_UPDATE_INTERVAL": 600,
     "DEVICE_STATUS_INTERVAL": 60,
     "MAX_RETRIES": 5,

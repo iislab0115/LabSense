@@ -125,6 +125,9 @@ cp config.json config.local.json
 
 | Key | Description |
 |---|---|
+| `SHELLY_DEVICES` | **Required for Shelly collection.** One entry per plug: `label` (becomes the CSV file prefix, e.g. `SMP01`), `id` (the device identifier the plug reports) and `ip` (its address on your local network). The collector refuses to start while these are still placeholders. |
+| `SHELLY_INTERVAL` | Shelly polling interval in seconds, default `1.0` |
+| `SHELLY_TIMEOUT` | Shelly HTTP request timeout in seconds, default `4.0` |
 | `CLIENT_ID` | SmartThings OAuth Client ID |
 | `CLIENT_SECRET` | SmartThings OAuth Client Secret |
 | `PAT_TOKEN` | SmartThings Personal Access Token (fallback for REST calls) |

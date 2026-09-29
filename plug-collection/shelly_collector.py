@@ -11,6 +11,7 @@ Shelly Plug 12개 데이터 수집 프로그램
 import requests
 import time
 import csv
+import json
 from datetime import datetime, timedelta
 import os
 import logging
@@ -23,25 +24,48 @@ import threading
 # 설정
 # ============================================
 
-# 스마트플러그 정보
-DEVICES = [
-    {"label": "SMP01", "id": "9070694ae97c", "ip": "192.168.0.172"},
-    {"label": "SMP02", "id": "907069496a08", "ip": "192.168.0.144"},
-    {"label": "SMP03", "id": "9070694a7d50", "ip": "192.168.0.180"},
-    {"label": "SMP04", "id": "907069416dc0", "ip": "192.168.0.196"},
-    {"label": "SMP05", "id": "90706949659c", "ip": "192.168.0.112"},
-    {"label": "SMP06", "id": "9070694969fc", "ip": "192.168.0.132"},
-    {"label": "SMP07", "id": "90706942f8f8", "ip": "192.168.0.136"},
-    {"label": "SMP08", "id": "9070694a7c94", "ip": "192.168.0.193"},
-    {"label": "SMP09", "id": "907069496a9c", "ip": "192.168.0.192"},
-    {"label": "SMP10", "id": "9070694361dc", "ip": "192.168.0.152"},
-    {"label": "SMP11", "id": "907069495ed4", "ip": "192.168.0.176"},
-    {"label": "SMP12", "id": "9070694b1cfc", "ip": "192.168.0.120"},
-]
+
+def _load_config():
+    """config.local.json 이 있으면 그것을, 없으면 config.json 템플릿을 읽는다.
+
+    기기 주소는 설치 환경마다 다르므로 소스에 두지 않는다. smartthings_auth.py
+    와 같은 규칙을 쓴다: config.json 은 커밋되는 템플릿이고, 실제 값은
+    git-ignore 되는 config.local.json 에 넣는다.
+    """
+    base = Path(__file__).resolve().parent
+    local = base / "config.local.json"
+    path = local if local.exists() else base / "config.json"
+    if not path.exists():
+        raise SystemExit(
+            "config.json / config.local.json 을 찾을 수 없습니다.\n"
+            "config.json 을 config.local.json 으로 복사한 뒤 값을 채워 주세요."
+        )
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f), path
+
+
+CONFIG, CONFIG_PATH = _load_config()
+
+
+def _devices_from_config(cfg, path):
+    devices = cfg.get("SHELLY_DEVICES") or []
+    bad = [d for d in devices
+           if "Please enter" in str(d.get("ip", "")) or "Please enter" in str(d.get("id", ""))]
+    if not devices or bad:
+        raise SystemExit(
+            "SHELLY_DEVICES 가 설정되지 않았습니다 (%s).\n"
+            "config.json 을 config.local.json 으로 복사하고, 각 플러그의 label, id, ip 를\n"
+            "실제 값으로 채워 주세요." % path.name
+        )
+    return devices
+
+
+# 스마트플러그 정보 (config.local.json 에서 로드)
+DEVICES = _devices_from_config(CONFIG, CONFIG_PATH)
 
 # 수집 설정
-INTERVAL = 1.0  # 1초 간격
-TIMEOUT = 4.0   # HTTP 요청 타임아웃 (Wi-Fi 지연 대비)
+INTERVAL = float(CONFIG.get("SHELLY_INTERVAL", 1.0))  # 기본 1초 간격
+TIMEOUT = float(CONFIG.get("SHELLY_TIMEOUT", 4.0))    # HTTP 요청 타임아웃 (Wi-Fi 지연 대비)
 MAX_RETRIES = 3  # 재시도 횟수
 
 # GUI(또는 프로그램 출력)용 주기
@@ -49,7 +73,13 @@ UI_UPDATE_EVERY_SECONDS = 5.0
 # 파일 flush 주기(너무 잦으면 I/O 부담이 커짐)
 FLUSH_EVERY_SAMPLES = 10
 
-CSV_BASE_DIR = Path(r"D:\smartthings_data\csv_data")
+_csv_base = CONFIG.get("CSV_BASE_DIR", "")
+if not _csv_base or "Please enter" in str(_csv_base):
+    raise SystemExit(
+        "CSV_BASE_DIR 이 설정되지 않았습니다 (%s).\n"
+        "CSV 출력 디렉터리의 절대 경로를 넣어 주세요." % CONFIG_PATH.name
+    )
+CSV_BASE_DIR = Path(_csv_base)
 CSV_BASE_DIR.mkdir(parents=True, exist_ok=True)
 
 # logs 저장 경로
