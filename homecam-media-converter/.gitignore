@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.env
+
+# Temp files created by the converter
+_media_conv_temp/
+*.h265
+*.raw
+
+# Output files (don't commit large videos)
+*.mp4
