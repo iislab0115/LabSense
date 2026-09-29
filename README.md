@@ -1,5 +1,17 @@
 # LabSense — data collection software
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/iislab0115/LabSense?label=Release)](https://github.com/iislab0115/LabSense/releases)
+[![Last commit](https://img.shields.io/github/last-commit/iislab0115/LabSense)](https://github.com/iislab0115/LabSense/commits/main)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
+[![Cite](https://img.shields.io/badge/Cite-CITATION.cff-informational.svg)](CITATION.cff)
+<!-- Zenodo DOI badge: replace CONCEPT_ID with the number from the Zenodo record
+     (Zenodo shows the ready-made markdown under "Get the badge"), then delete
+     this comment. The concept DOI is used here on purpose, so the badge keeps
+     resolving to the newest archived version.
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.CONCEPT_ID.svg)](https://doi.org/10.5281/zenodo.CONCEPT_ID)
+-->
+
 Software used to collect and prepare **LabSense**, a multimodal ambient sensor dataset for activity,
 occupancy and energy analysis in an office workspace, described in the accompanying Data Descriptor.
 
