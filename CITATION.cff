@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software or the associated dataset, please cite it using the
+  metadata below.
+title: >-
+  LabSense data collection software
+type: software
+authors:
+  - family-names: Kim
+    given-names: Jeein
+    affiliation: >-
+      Department of AI Convergence, Gwangju Institute of Science and
+      Technology, Gwangju, 61005, South Korea
+  - family-names: Lee
+    given-names: Haewon
+    affiliation: >-
+      Department of Electrical Engineering and Computer Science, Gwangju
+      Institute of Science and Technology, Gwangju, 61005, South Korea
+  - family-names: Lee
+    given-names: Joyoung
+    affiliation: >-
+      Department of AI Convergence, Gwangju Institute of Science and
+      Technology, Gwangju, 61005, South Korea
+  - family-names: Roh
+    given-names: Janghyun
+    affiliation: >-
+      Department of AI Convergence, Gwangju Institute of Science and
+      Technology, Gwangju, 61005, South Korea
+  - family-names: Hwang
+    given-names: Euiseok
+    affiliation: >-
+      Department of AI Convergence and Department of Electrical Engineering
+      and Computer Science, Gwangju Institute of Science and Technology,
+      Gwangju, 61005, South Korea
+    email: euiseokh@gist.ac.kr
+version: v1.0.0
+# NOTE: `date-released` will be updated at publication time.
+date-released: "2026-09-29"
+license: MIT
+repository-code: "https://github.com/iislab0115/LabSense"
+keywords:
+  - smart home
+  - occupancy detection
+  - activity recognition
+  - ambient sensing
+  - time series
+  - SmartThings
+  - Shelly
+  - IoT
+  - energy monitoring
