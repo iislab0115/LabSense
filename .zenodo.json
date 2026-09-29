@@ -1,0 +1,42 @@
+{
+  "title": "LabSense data collection software",
+  "upload_type": "software",
+  "license": "MIT",
+  "version": "v1.0.0",
+  "language": "eng",
+  "description": "<p>Software used to collect and prepare <strong>LabSense</strong>, a multimodal ambient sensor dataset for activity, occupancy and energy analysis in an office workspace, described in the accompanying Data Descriptor.</p><p>The repository consolidates three tools that were previously maintained separately:</p><ul><li><strong>data-collection</strong> &mdash; polls Shelly smart plugs over the local network at 1 s and SmartThings devices (plugs, motion sensors, door-contact sensors, a stick vacuum and camera event channels) through the SmartThings API at 60 s, with a live dashboard and a supervisor that restarts a stalled collector.</li><li><strong>har-datalogger</strong> &mdash; the application the three primary participants used to record activity transitions in real time, and to produce the raw, refined and merged self-report logs behind the activity annotations.</li><li><strong>homecam-media-converter</strong> &mdash; converts CN Core HomeCam <code>.media</code> files to MP4 (H.264 + AAC) for annotation review; the converted video is not part of the public dataset.</li></ul><p>No credential, token, private network address, collected measurement or participant identifier is present in this repository. Device addresses and acquisition paths are supplied at run time through a configuration file that is excluded from version control.</p><p>This software is not required to use the released dataset, which is self-describing; it is published so that the acquisition can be audited and reproduced.</p>",
+  "creators": [
+    {
+      "name": "Kim, Jeein",
+      "affiliation": "Department of AI, Gwangju Institute of Science and Technology, Gwangju, 61005, South Korea"
+    },
+    {
+      "name": "Lee, Haewon",
+      "affiliation": "Department of Electrical Engineering and Computer Science, Gwangju Institute of Science and Technology, Gwangju, 61005, South Korea"
+    },
+    {
+      "name": "Lee, JuYoung",
+      "affiliation": "Department of AI, Gwangju Institute of Science and Technology, Gwangju, 61005, South Korea"
+    },
+    {
+      "name": "Roh, Janghyun",
+      "affiliation": "Department of AI, Gwangju Institute of Science and Technology, Gwangju, 61005, South Korea"
+    },
+    {
+      "name": "Hwang, Euiseok",
+      "affiliation": "Department of AI and Department of Electrical Engineering and Computer Science, Gwangju Institute of Science and Technology, Gwangju, 61005, South Korea"
+    }
+  ],
+  "keywords": [
+    "smart home",
+    "occupancy detection",
+    "activity recognition",
+    "ambient sensing",
+    "time series",
+    "SmartThings",
+    "Shelly",
+    "IoT",
+    "energy monitoring",
+    "non-intrusive load monitoring"
+  ]
+}
