@@ -473,7 +473,7 @@ Compress-Archive D:\smartthings_data\csv_data\* D:\backup\csv_data_$(Get-Date -F
 If you use this software or the associated dataset in a research context,
 please cite the following work:
 
-Kim, J., Lee, H., Lee, Y., Roh, J., & Hwang, E. (2026).
+Kim, J., Lee, H., Lee, J., Roh, J., & Hwang, E. (2026).
 *Ambient sensor time-series data for occupancy and activity recognition in a
 laboratory workspace.*
 
@@ -483,7 +483,7 @@ BibTeX:
 @misc{kim2026ambient,
   title        = {Ambient sensor time-series data for occupancy and activity
                   recognition in a laboratory workspace},
-  author       = {Kim, Jeein and Lee, Haewon and Lee, Yuyoung and
+  author       = {Kim, Jeein and Lee, Haewon and Lee, JuYoung and
                   Roh, Janghyun and Hwang, Euiseok},
   year         = {2026},
   howpublished = {\url{https://github.com/lime9903/data-collection}},
@@ -496,7 +496,7 @@ which GitHub renders as a "Cite this repository" widget.
 
 ### Authors and Affiliations
 
-- **Jeein Kim**$^{1}$, **Haewon Lee**$^{2}$, **Yuyoung Lee**$^{1}$,
+- **Jeein Kim**$^{1}$, **Haewon Lee**$^{2}$, **JuYoung Lee**$^{1}$,
   **Janghyun Roh**$^{1}$, **Euiseok Hwang**$^{1,2,*}$
 - $^{1}$ Department of AI, Gwangju Institute of Science and
   Technology, Gwangju, 61005, South Korea
