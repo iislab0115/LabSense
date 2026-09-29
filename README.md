@@ -1,7 +1,7 @@
 # LabSense — data collection software
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/iislab0115/LabSense?label=Release)](https://github.com/iislab0115/LabSense/releases)
+[![Release](https://img.shields.io/github/v/release/iislab0115/LabSense?include_prereleases&label=Release)](https://github.com/iislab0115/LabSense/releases)
 [![Last commit](https://img.shields.io/github/last-commit/iislab0115/LabSense)](https://github.com/iislab0115/LabSense/commits/main)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Cite](https://img.shields.io/badge/Cite-CITATION.cff-informational.svg)](CITATION.cff)
