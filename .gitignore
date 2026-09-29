@@ -1,0 +1,7 @@
+dist/
+build/
+*.exe
+*.spec
+GT_LOG/
+ts_config.txt
+__pycache__/
