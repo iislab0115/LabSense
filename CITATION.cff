@@ -34,10 +34,17 @@ authors:
       Gwangju, 61005, South Korea
     email: euiseokh@gist.ac.kr
 version: v1.0.0
-# NOTE: `date-released` will be updated at publication time.
 date-released: "2026-09-29"
 license: MIT
 repository-code: "https://github.com/iislab0115/LabSense"
+doi: 10.5281/zenodo.23032924
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23032923
+    description: Concept DOI, always resolving to the latest archived version
+  - type: doi
+    value: 10.5281/zenodo.23032924
+    description: Version DOI for v1.0.0, the version archived for this release
 keywords:
   - smart home
   - occupancy detection

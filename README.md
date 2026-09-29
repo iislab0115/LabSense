@@ -5,12 +5,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/iislab0115/LabSense)](https://github.com/iislab0115/LabSense/commits/main)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Cite](https://img.shields.io/badge/Cite-CITATION.cff-informational.svg)](CITATION.cff)
-<!-- Zenodo DOI badge: replace CONCEPT_ID with the number from the Zenodo record
-     (Zenodo shows the ready-made markdown under "Get the badge"), then delete
-     this comment. The concept DOI is used here on purpose, so the badge keeps
-     resolving to the newest archived version.
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.CONCEPT_ID.svg)](https://doi.org/10.5281/zenodo.CONCEPT_ID)
--->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23032923.svg)](https://doi.org/10.5281/zenodo.23032923)
 
 Software used to collect and prepare **LabSense**, a multimodal ambient sensor dataset for activity,
 occupancy and energy analysis in an office workspace, described in the accompanying Data Descriptor.
@@ -65,5 +60,13 @@ git subtree pull --prefix=data-collection https://github.com/lime9903/data-colle
 
 ## Citation
 
-If you use this software, cite it through [`CITATION.cff`](CITATION.cff), and cite the dataset by its
-own DOI.
+If you use this software, cite the archived version rather than the repository head, so that the
+code you cite is the code you ran:
+
+> Kim, J., Lee, H., Lee, J., Roh, J. & Hwang, E. *LabSense Data Collection Software* (v1.0.0).
+> Zenodo. <https://doi.org/10.5281/zenodo.23032924> (2026).
+
+Machine-readable metadata is in [`CITATION.cff`](CITATION.cff). The badge above points at the
+concept DOI, `10.5281/zenodo.23032923`, which always resolves to the newest archived version.
+
+The **dataset** is deposited separately and has its own DOI; cite that when you use the data.
