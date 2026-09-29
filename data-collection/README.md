@@ -1,14 +1,13 @@
 # Integrated Smart-Home Data Collection System (Shelly + SmartThings)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](#system-requirements)
-[![Release](https://img.shields.io/github/v/release/iislab0115/LabSense?include_prereleases&label=Release)](https://github.com/iislab0115/LabSense/releases)
-[![Last Commit](https://img.shields.io/github/last-commit/iislab0115/LabSense)](https://github.com/iislab0115/LabSense/commits/main)
 [![Cite](https://img.shields.io/badge/Cite-CITATION.cff-informational.svg)](CITATION.cff)
-<!-- Uncomment after minting a Zenodo DOI:
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
--->
+
+Part of the [LabSense](../README.md) data collection software. The release
+version, archive DOI and repository-level badges are on the repository front
+page.
 
 Reference implementation and data-collection framework for the study
 *"Ambient sensor time-series data for occupancy and activity recognition in a
