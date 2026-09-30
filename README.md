@@ -1,13 +1,13 @@
-# LabSense — data collection software
+# OPAL — data collection software
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/iislab0115/LabSense?include_prereleases&label=Release)](https://github.com/iislab0115/LabSense/releases)
-[![Last commit](https://img.shields.io/github/last-commit/iislab0115/LabSense)](https://github.com/iislab0115/LabSense/commits/main)
+[![Release](https://img.shields.io/github/v/release/iislab0115/OPAL?include_prereleases&label=Release)](https://github.com/iislab0115/OPAL/releases)
+[![Last commit](https://img.shields.io/github/last-commit/iislab0115/OPAL)](https://github.com/iislab0115/OPAL/commits/main)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Cite](https://img.shields.io/badge/Cite-CITATION.cff-informational.svg)](CITATION.cff)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23032923.svg)](https://doi.org/10.5281/zenodo.23032923)
 
-Software used to collect and prepare **LabSense**, a multimodal ambient sensor dataset for activity,
+Software used to collect and prepare **OPAL**, a multimodal ambient sensor dataset for activity,
 occupancy and energy analysis in an office workspace, described in the accompanying Data Descriptor.
 
 This repository consolidates the three tools that were previously maintained separately. Each tool
@@ -24,8 +24,8 @@ keeps its own README, requirements and history; this page explains how they fit 
 The released dataset is deposited separately, because it is 1.96 GB and is versioned and cited on its
 own. This repository is the software; the dataset is the data.
 
-- Dataset: [DOI URL] — `TO BE ASSIGNED ON DEPOSIT`
-- Data Descriptor: `TO BE ASSIGNED ON PUBLICATION`
+- Dataset: <https://doi.org/10.5281/zenodo.23035057> — released under CC BY 4.0, separately from this MIT-licensed code
+- Data Descriptor: under review; this line carries its DOI once it is published
 
 Nothing in this repository is required to *use* the dataset. The released CSV files are
 self-describing and documented by the data dictionary that ships with them. This code is here so that
@@ -63,10 +63,11 @@ git subtree pull --prefix=data-collection https://github.com/lime9903/data-colle
 If you use this software, cite the archived version rather than the repository head, so that the
 code you cite is the code you ran:
 
-> Kim, J., Lee, H., Lee, J., Roh, J. & Hwang, E. *LabSense Data Collection Software* (v1.0.0).
+> Kim, J., Lee, H., Lee, J., Roh, J. & Hwang, E. *OPAL Data Collection Software* (v1.0.0).
 > Zenodo. <https://doi.org/10.5281/zenodo.23032924> (2026).
 
 Machine-readable metadata is in [`CITATION.cff`](CITATION.cff). The badge above points at the
 concept DOI, `10.5281/zenodo.23032923`, which always resolves to the newest archived version.
 
-The **dataset** is deposited separately and has its own DOI; cite that when you use the data.
+The **dataset** is deposited separately under its own DOI, <https://doi.org/10.5281/zenodo.23035057>. Cite that when you use
+the data, and this software only when you reuse or audit the acquisition code.

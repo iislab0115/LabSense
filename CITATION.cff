@@ -3,7 +3,7 @@ message: >-
   If you use this software or the associated dataset, please cite it using the
   metadata below.
 title: >-
-  LabSense data collection software
+  OPAL data collection software
 type: software
 authors:
   - family-names: Kim
@@ -17,7 +17,7 @@ authors:
       Department of Electrical Engineering and Computer Science, Gwangju
       Institute of Science and Technology, Gwangju, 61005, South Korea
   - family-names: Lee
-    given-names: Juyoung
+    given-names: Jooyoung
     affiliation: >-
       Department of AI, Gwangju Institute of Science and
       Technology, Gwangju, 61005, South Korea
@@ -34,9 +34,9 @@ authors:
       Gwangju, 61005, South Korea
     email: euiseokh@gist.ac.kr
 version: v1.0.0
-date-released: "2026-09-29"
+date-released: "2026-09-30"
 license: MIT
-repository-code: "https://github.com/iislab0115/LabSense"
+repository-code: "https://github.com/iislab0115/OPAL"
 doi: 10.5281/zenodo.23032924
 identifiers:
   - type: doi
@@ -45,6 +45,25 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.23032924
     description: Version DOI for v1.0.0, the version archived for this release
+references:
+  - type: data
+    title: "OPAL: A multimodal ambient sensor dataset for activity, occupancy, and energy analysis in an office workspace"
+    authors:
+      - family-names: Kim
+        given-names: Jeein
+      - family-names: Lee
+        given-names: Haewon
+      - family-names: Lee
+        given-names: Jooyoung
+      - family-names: Roh
+        given-names: Janghyun
+      - family-names: Hwang
+        given-names: Euiseok
+    version: "1.0.0"
+    doi: 10.5281/zenodo.23035057
+    year: 2026
+    publisher:
+      name: Zenodo
 keywords:
   - smart home
   - occupancy detection

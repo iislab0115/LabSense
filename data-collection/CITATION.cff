@@ -18,7 +18,7 @@ authors:
       Department of Electrical Engineering and Computer Science, Gwangju
       Institute of Science and Technology, Gwangju, 61005, South Korea
   - family-names: Lee
-    given-names: Juyoung
+    given-names: Jooyoung
     affiliation: >-
       Department of AI, Gwangju Institute of Science and
       Technology, Gwangju, 61005, South Korea
@@ -38,7 +38,7 @@ version: v1.0.0
 # NOTE: `date-released` will be updated at publication time.
 date-released: "2026-07-13"
 license: MIT
-repository-code: "https://github.com/iislab0115/LabSense"
+repository-code: "https://github.com/iislab0115/OPAL"
 keywords:
   - smart home
   - occupancy detection

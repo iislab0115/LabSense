@@ -5,7 +5,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](#system-requirements)
 [![Cite](https://img.shields.io/badge/Cite-CITATION.cff-informational.svg)](CITATION.cff)
 
-Part of the [LabSense](../README.md) data collection software. The release
+Part of the [OPAL](../README.md) data collection software. The release
 version, archive DOI and repository-level badges are on the repository front
 page.
 
@@ -482,10 +482,10 @@ BibTeX:
 @misc{kim2026ambient,
   title        = {Ambient sensor time-series data for occupancy and activity
                   recognition in a laboratory workspace},
-  author       = {Kim, Jeein and Lee, Haewon and Lee, Juyoung and
+  author       = {Kim, Jeein and Lee, Haewon and Lee, Jooyoung and
                   Roh, Janghyun and Hwang, Euiseok},
   year         = {2026},
-  howpublished = {\url{https://github.com/iislab0115/LabSense}},
+  howpublished = {\url{https://github.com/iislab0115/OPAL}},
   note         = {Version v1.0.0}
 }
 ```
@@ -495,7 +495,7 @@ which GitHub renders as a "Cite this repository" widget.
 
 ### Authors and Affiliations
 
-- **Jeein Kim**$^{1}$, **Haewon Lee**$^{2}$, **Juyoung Lee**$^{1}$,
+- **Jeein Kim**$^{1}$, **Haewon Lee**$^{2}$, **Jooyoung Lee**$^{1}$,
   **Janghyun Roh**$^{1}$, **Euiseok Hwang**$^{1,2,*}$
 - $^{1}$ Department of AI, Gwangju Institute of Science and
   Technology, Gwangju, 61005, South Korea

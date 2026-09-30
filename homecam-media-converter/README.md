@@ -24,8 +24,8 @@ A Python script that converts CN Core home-camera `.media` files to MP4 (H.264 +
 Install FFmpeg, then take this script. No additional Python packages are needed.
 
 ```bash
-git clone https://github.com/iislab0115/LabSense.git
-cd LabSense/homecam-media-converter
+git clone https://github.com/iislab0115/OPAL.git
+cd OPAL/homecam-media-converter
 ```
 
 ## Usage
